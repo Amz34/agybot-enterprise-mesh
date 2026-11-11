@@ -1,0 +1,24 @@
+{
+  "name": "AgyBot Sovereign Agent",
+  "short_name": "AgyBot",
+  "description": "Sovereign AI Agent Cockpit with Live Screencast, Audio Voice Control, and Host CLI Execution",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AgyBot | Sovereign AI Agent Cockpit</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0b0f19; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .active-tab { border-bottom: 2px solid #38bdf8; color: #38bdf8; }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+  <!-- Top App Navigation Bar -->
+  <header class="glass px-4 py-3 flex items-center justify-between shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+          AgyBot
+          <span class="text-xs bg-sky-950 text-sky-400 px-2 py-0.5 rounded-full border border-sky-800">ARM64 Sovereign</span>
+        </h1>
+        <p class="text-xs text-gray-400" id="hostTelemetry">Connecting...</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="pwaInstallBtn" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-md font-semibold transition">
+        <i class="fa-solid fa-download mr-1"></i> Install App
+      </button>
+      <div id="connectionStatus" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="flex glass border-t-0 border-b shrink-0 text-sm font-medium">
+    <button onclick="switchTab('chat')" id="tab-chat" class="flex-1 py-3 text-center active-tab">
+      <i class="fa-solid fa-comments mr-1.5"></i> Chat & Execution
+    </button>
+    <button onclick="switchTab('screen')" id="tab-screen" class="flex-1 py-3 text-center text-gray-400 hover:text-gray-200">
+      <i class="fa-solid fa-desktop mr-1.5"></i> Live Computer
+    </button>
+    <button onclick="switchTab('telemetry')" id="tab-telemetry" class="flex-1 py-3 text-center text-gray-400 hover:text-gray-200">
+      <i class="fa-solid fa-chart-line mr-1.5"></i> Infra & Tools
+    </button>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="flex-1 flex flex-col overflow-hidden relative">
+
+    <!-- 1. CHAT & EXECUTION TAB -->
+    <section id="view-chat" class="flex-1 flex flex-col p-4 overflow-hidden">
+      <div id="chatMessages" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="glass p-3 rounded-xl max-w-xl self-start">
+          <p class="text-xs text-sky-400 font-semibold mb-1"><i class="fa-solid fa-brain mr-1"></i> AgyBot Assistant</p>
+          <p class="text-sm text-gray-200">Welcome to your sovereign AgyBot workspace. I am connected directly to your Linux ARM64 VM. You can speak to me, dispatch bash tasks, or inspect the live computer screen.</p>
+        </div>
+      </div>
+
+      <!-- Action suggestions -->
+      <div class="py-2 flex gap-2 overflow-x-auto text-xs shrink-0">
+        <button onclick="quickAction('Check system load and memory')" class="glass px-3 py-1.5 rounded-lg text-gray-300 hover:text-white shrink-0">
+          <i class="fa-solid fa-microchip mr-1 text-sky-400"></i> Check System Health
+        </button>
+        <button onclick="quickAction('List files in current workspace')" class="glass px-3 py-1.5 rounded-lg text-gray-300 hover:text-white shrink-0">
+          <i class="fa-solid fa-folder mr-1 text-amber-400"></i> List Workspace Files
+        </button>
+        <button onclick="quickAction('Run benchmark on ARM64 host')" class="glass px-3 py-1.5 rounded-lg text-gray-300 hover:text-white shrink-0">
+          <i class="fa-solid fa-bolt mr-1 text-emerald-400"></i> Run Benchmark
+        </button>
+      </div>
+
+      <!-- Input Bar with Voice Button -->
+      <div class="glass p-2 rounded-2xl flex items-center space-x-2 shrink-0">
+        <button id="voiceBtn" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center transition">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <input type="text" id="userInput" placeholder="Ask AgyBot or type 'run: ls -la'..." class="flex-1 bg-transparent px-3 py-2 text-sm text-white focus:outline-none">
+        <button id="sendBtn" class="w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center transition shadow">
+          <i class="fa-solid fa-arrow-up"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. LIVE COMPUTER TAB -->
+    <section id="view-screen" class="hidden flex-1 flex flex-col p-4 overflow-hidden">
+      <div class="glass px-3 py-2 rounded-t-xl flex items-center justify-between text-xs text-gray-400 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>CDP Live Screencast Active</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="navUrl" value="https://google.com" class="bg-gray-800 px-2 py-1 rounded text-gray-200 text-xs w-48 focus:outline-none">
+          <button onclick="navigateBrowser()" class="bg-sky-600 px-2 py-1 rounded text-white font-medium">Go</button>
+        </div>
+      </div>
+      <div class="flex-1 bg-black rounded-b-xl overflow-hidden relative flex items-center justify-center border border-t-0 border-gray-800">
+        <img id="liveCanvas" class="w-full h-full object-contain" alt="Live Computer Screencast">
+      </div>
+    </section>
+
+    <!-- 3. INFRASTRUCTURE & TELEMETRY TAB -->
+    <section id="view-telemetry" class="hidden flex-1 p-4 overflow-y-auto space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="glass p-4 rounded-xl">
+          <p class="text-xs text-gray-400">Architecture</p>
+          <p class="text-lg font-bold text-sky-400" id="tele-arch">Linux ARM64</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+          <p class="text-xs text-gray-400">CPU Cores</p>
+          <p class="text-lg font-bold text-emerald-400" id="tele-cores">2 vCPUs</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+          <p class="text-xs text-gray-400">Disk Used</p>
+          <p class="text-lg font-bold text-amber-400" id="tele-disk">--</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+          <p class="text-xs text-gray-400">Gateway Status</p>
+          <p class="text-lg font-bold text-indigo-400">Online</p>
+        </div>
+      </div>
+
+      <div class="glass p-4 rounded-xl">
+        <h3 class="text-sm font-semibold text-white mb-2"><i class="fa-solid fa-terminal mr-2 text-sky-400"></i> Direct Host Command</h3>
+        <div class="flex gap-2">
+          <input type="text" id="directCommandInput" placeholder="e.g. docker ps, git status..." class="flex-1 bg-gray-900 border border-gray-700 px-3 py-2 rounded-lg text-sm text-white">
+          <button onclick="runDirectCommand()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium">Execute</button>
+        </div>
+        <pre id="commandOutput" class="mt-3 bg-black/60 p-3 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto max-h-48 border border-gray-800">Ready for commands.</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
