@@ -7,7 +7,7 @@ let deferredPrompt = null;
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/sw.js')
+  navigator.serviceWorker.register('sw.js')
     .then(() => console.log('AgyBot Service Worker Registered'))
     .catch(err => console.error('SW Registration Failed:', err));
 }

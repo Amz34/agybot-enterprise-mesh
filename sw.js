@@ -1,8 +1,8 @@
 const CACHE_NAME = 'agybot-mesh-v1';
 const ASSETS = [
   '/',
-  '/static/manifest.json',
-  '/static/app.js'
+  'manifest.json',
+  'app.js'
 ];
 
 self.addEventListener('install', (e) => {
