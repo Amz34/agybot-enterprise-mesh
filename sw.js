@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agybot-mesh-v1';
+const CACHE_NAME = 'agybot-mesh-v2';
 const ASSETS = [
   '/',
   'manifest.json',
