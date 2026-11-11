@@ -45,7 +45,13 @@ function switchTab(tabId) {
 // WebSocket Connection
 function connectWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrl = `${protocol}//${window.location.host}/ws`;
+  let host = window.location.host;
+  let proto = protocol;
+  if (window.location.hostname.includes('github.io')) {
+    host = 'advanced-amd-supplied-removable.trycloudflare.com';
+    proto = 'wss:';
+  }
+  const wsUrl = `${proto}//${host}/ws`;
   ws = new WebSocket(wsUrl);
 
   const statusDot = document.getElementById('connectionStatus');
@@ -119,7 +125,7 @@ function sendMessage() {
     ws.send(JSON.stringify({ type: 'chat_message', message: text }));
   } else {
     // Fallback REST call
-    fetch('/api/chat', {
+    fetch((window.location.hostname.includes('github.io') ? 'https://advanced-amd-supplied-removable.trycloudflare.com' : '') + '/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })
@@ -142,7 +148,7 @@ function runDirectCommand() {
   const out = document.getElementById('commandOutput');
   out.textContent = `Running: ${cmd}...`;
 
-  fetch('/api/exec', {
+  fetch((window.location.hostname.includes('github.io') ? 'https://advanced-amd-supplied-removable.trycloudflare.com' : '') + '/api/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ command: cmd })
@@ -165,7 +171,7 @@ function navigateBrowser() {
 
 // Telemetry Fetch
 function fetchTelemetry() {
-  fetch('/api/telemetry')
+  fetch((window.location.hostname.includes('github.io') ? 'https://advanced-amd-supplied-removable.trycloudflare.com' : '') + '/api/telemetry')
     .then(r => r.json())
     .then(data => updateTelemetryDisplay(data))
     .catch(() => {});
